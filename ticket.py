@@ -6,6 +6,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoAlertPresentException
+from datetime import datetime
+import pytz
 import time
 import easyocr
 
@@ -97,7 +99,6 @@ def findSeats(): # 좌석선택
         chk = 0
 
         for BlockNumber in BlockNumbers:
-
             time.sleep(0.5)
             script = f"GetBlockSeatList('', '', '{BlockNumber}')"
             print("**********************************************************************")
@@ -226,16 +227,42 @@ def payment():
     print("**********************************************************************")
     wait.until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, "//*[@id='ifrmBookStep']")))
 
-    print("**********************************************************************")
-    print("*****************************무통장 선택*******************************")
-    print("**********************************************************************")
-    wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="Payment_22004"]/td/input'))).click()
+    # 시간 가져오기
+    def nowTime(zone):
+        tz = pytz.timezone(zone)
+        now = datetime.now(tz)
 
-    print("**********************************************************************")
-    print("******************************은행 선택********************************")
-    print("**********************************************************************")
-    select2 = Select(wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="BankCode"]'))))
-    select2.select_by_index(1)
+        if now.hour > 23 or (now.hour == 23 and now.minute >= 20):
+            return True
+        else:
+            return False
+
+    if __name__ == "__main__":
+        nowTime = nowTime('Asia/Seoul')
+        if nowTime:
+            # 은행 점검시간 이후
+            print("**********************************************************************")
+            print("****************************카드결제 선택*******************************")
+            print("**********************************************************************")
+            wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="Payment_22003"]/td/input'))).click()
+
+            print("**********************************************************************")
+            print("******************************카드 선택********************************")
+            print("**********************************************************************")
+            select2 = Select(wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="DiscountCard"]'))))
+            select2.select_by_index(4)
+        else:
+            print("**********************************************************************")
+            print("*****************************무통장 선택*******************************")
+            print("**********************************************************************")
+            wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="Payment_22004"]/td/input'))).click()
+
+            print("**********************************************************************")
+            print("******************************은행 선택********************************")
+            print("**********************************************************************")
+            select2 = Select(wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="BankCode"]'))))
+            select2.select_by_index(1)
+
 
     driver.switch_to.default_content()
     wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@id='SmallNextBtnImage']"))).click()
@@ -248,7 +275,7 @@ def payment():
     wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="checkAll"]'))).click()
 
     driver.switch_to.default_content()
-    #wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="LargeNextBtnImage"]'))).click()
+    wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="LargeNextBtnImage"]'))).click()
 
     input("**********************************************************************\n"
           "***********************예매완료됨 엔터를누르면 창을닫음*******************\n"
@@ -268,15 +295,12 @@ while capchaPng:
         .replace('1', 'L').replace('e', 'Q').replace('3', 'S').replace('€', 'C').replace('{', '').replace('-', '')
 
     # 입력
-    #driver.find_element(By.XPATH,'//*[@id="divRecaptcha"]/div[1]/div[3]').click()
     wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="divRecaptcha"]/div[1]/div[3]'))).click()
 
-    #chapchaText = driver.find_element(By.XPATH,'//*[@id="txtCaptcha"]')
     chapchaText = wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="txtCaptcha"]')))
     chapchaText.send_keys(capchaValue)
 
     #입력완료 버튼 클릭
-    #driver.find_element(By.XPATH,'//*[@id="divRecaptcha"]/div[1]/div[4]/a[2]').click()
     wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="divRecaptcha"]/div[1]/div[4]/a[2]'))).click()
 
     display = driver.find_element(By.XPATH,'//*[@id="divRecaptcha"]').is_displayed()
