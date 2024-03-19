@@ -34,6 +34,11 @@ BlockNumbers_str = input("숫자를 공백으로 구분해서 입력 ex) 036 037
 BlockNumbers = BlockNumbers_str.split()
 
 print("**********************************************************************")
+print("******************************생년월일입력******************************")
+print("**********************************************************************")
+birth_day = input("ex) 23년3월3일 (X) -> 230303 (O)\n>>>>>>>>> ")
+
+print("**********************************************************************")
 print("***************************예매시작시간 대기중***************************")
 print("**********************************************************************")
 
@@ -217,7 +222,7 @@ def payment():
     print("*****************************주문자 확인*******************************")
     print("**********************************************************************")
     wait.until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, "//*[@id='ifrmBookStep']")))
-    wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="YYMMDD"]'))).send_keys('950804')
+    wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="YYMMDD"]'))).send_keys(birth_day)
 
     driver.switch_to.default_content()
     wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@id='SmallNextBtnImage']"))).click()
